@@ -2,6 +2,7 @@
   "name": "quanlynhanvien",
   "version": "1.0.0",
   "description": "",
+  "type": "module",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -12,6 +13,9 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.19.2",
-    "nodemon": "^3.1.0"
+    "msnodesqlv8": "^4.2.1",
+    "mssql": "^10.0.2",
+    "nodemon": "^3.1.0",
+    "tedious": "^18.1.0"
   }
 }

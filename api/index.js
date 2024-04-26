@@ -1,11 +1,14 @@
-const express = require("express");
+import express from "express";
+import sqlConnection from "./config/database.js";
+
 const app = express();
-const port = 3000;
 
-app.get("/", (req, res) => {
-  res.send("Hello World!");
-});
-
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`);
-});
+sqlConnection()
+  .then(() => {
+    app.listen(3000, () => {
+      console.log("Server is running on port 3000");
+    });
+  })
+  .catch((error) => {
+    console.error("Error connecting to SQL Server:", error.message);
+  });

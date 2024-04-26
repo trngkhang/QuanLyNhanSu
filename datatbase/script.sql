@@ -49,3 +49,6 @@ GO
 ALTER TABLE TaiKhoan ADD CONSTRAINT FK_TaiKhooan_NhanVien
 FOREIGN KEY (TenDangNhap) REFERENCES NhanVien(MaNV);
 GO
+
+insert NhanVien(MaNV) values ('admin')
+insert TaiKhoan (TenDangNhap, MatKhau, IsAdmin) values ('admin','admin',1)

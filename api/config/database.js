@@ -16,7 +16,6 @@ const sqlConfig = {
 const sqlConnection = async () => {
   try {
     await sql.connect(sqlConfig);
-    console.log("Ket noi co so du lieu thanh cong!!!");
   } catch (err) {
     console.log(err);
   }

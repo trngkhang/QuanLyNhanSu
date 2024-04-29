@@ -140,12 +140,12 @@ as
 begin
     if exists(select MaNV from NHANVIEN where MaNV=@MaNV and ChucVu=@ChucVu and MatKhau= HASHBYTES('SHA1',@MatKhau))
 		begin
-			--trả về MaNV và CHucVu
-			SELECT 'ThanhCong' as DangNhap ;select @MaNV AS MaNV, @ChucVu AS ChucVu;
+			--trả về Thong tin nhan vien
+			SELECT 'ThanhCong' as DangNhap ;select MaNV, HoTen, ChucVu from NHANVIEN where MaNV=@MaNV;
 		end
 		else
 		begin
-			select 'ThatBai' as Message;
+			select 'ThatBai' as DangNhap;
 		end
 end
 

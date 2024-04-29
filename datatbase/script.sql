@@ -1,6 +1,6 @@
 ﻿USE master;
 GO
-
+-- drop database QuanLyNhanVien
 -- Tao co so du lieu
 CREATE DATABASE QuanLyNhanVien;
 GO
@@ -10,54 +10,38 @@ USE QuanLyNhanVien;
 GO
 
 -- Tao bang thong tin nhan vien
-CREATE TABLE NhanVien (
+CREATE TABLE NHANVIEN (
     MaNV VARCHAR(10) PRIMARY KEY,
     HoTen NVARCHAR(100),
     Phai NVARCHAR(3),
     NgaySinh DATE,
     SoDienThoai VARCHAR(15),
-    Luong INT,
-    PhuCap INT,
+    Luong VARBINARY(max),
+    PhuCap VARBINARY(max),
     MaSoThue VARCHAR(20),
     MaPhong VARCHAR(10),
-	MatKhau VARBINARY(max) not null,
-	Role VARCHAR(50),
+	MatKhau VARBINARY(max),
+	ChucVu VARCHAR(50),
 );
 
 -- Tao bang thong tin phong ban
-CREATE TABLE PhongBan (
+CREATE TABLE PHONGBAN (
     MaPhong VARCHAR(10) PRIMARY KEY,
     TenPhong NVARCHAR(100),
     TruongPhong VARCHAR(10)
 );
 GO
-CREATE TABLE TaiKhoanQuanTri (
-    MaNV VARCHAR(10) PRIMARY KEY,
-	MatKhau VARCHAR(50),
-	Role VARCHAR(50),
-);
-GO
-
---Tao bang Users va Roles
--- CREATE TABLE TaiKhoan (
---     TenDangNhap VARCHAR(10) PRIMARY KEY,
---     MatKhau VARCHAR(50),
---     Role VARCHAR(50),
--- 	IsAdmin BIT NOT NULL DEFAULT 0,
--- );
 
 -- Them rang buoc khoa ngoai
-ALTER TABLE NhanVien ADD CONSTRAINT FK_NhanVIen_PhongBan
-FOREIGN KEY (MaPhong) REFERENCES PhongBan(MaPhong);
+ALTER TABLE NHANVIEN ADD CONSTRAINT FK_NHANVIEN_PHONGBAN
+FOREIGN KEY (MaPhong) REFERENCES PHONGBAN(MaPhong);
 GO
-ALTER TABLE PhongBan ADD CONSTRAINT PhongBan_NhanVien
-FOREIGN KEY (TruongPhong) REFERENCES NhanVien(MaNV);
+ALTER TABLE PHONGBAN ADD CONSTRAINT PHONGBAN_NHANVIEN
+FOREIGN KEY (TruongPhong) REFERENCES NHANVIEN(MaNV);
 GO
--- ALTER TABLE TaiKhoan ADD CONSTRAINT FK_TaiKhooan_NhanVien
--- FOREIGN KEY (TenDangNhap) REFERENCES NhanVien(MaNV);
--- GO
 
-insert NhanVien(MaNV) values ('admin')
+insert into PHONGBAN(MaPhong, TenPhong, TruongPhong)
+values ('GiamDoc',N'Phòng giám đốc', null)
 
 
 -- ======================================================
@@ -94,7 +78,7 @@ BEGIN
     FROM TaiKhoanQuanTri
     WHERE MaNV = @MaNV_dn AND MatKhau = HASHBYTES('SHA1',@MatKhau_dn))
 		BEGIN
-			SELECT 'Successful' AS message
+			SELECT 'Successful' AS message, @MaNV_dn as maNV
 		END
 		ELSE
 		BEGIN
@@ -105,3 +89,64 @@ GO
 
 execute SP_DangNhapTaiKhoanQuanTri 'admin', '123456'
 GO
+
+
+-- drop proc SP_IN_NHANVIEN
+
+create proc SP_IN_NHANVIEN
+    @MaNV VARCHAR(10),
+    @HoTen NVARCHAR(100),
+    @Phai NVARCHAR(3),
+    @NgaySinh DATE,
+    @SoDienThoai VARCHAR(15),
+    @Luong INT,
+    @PhuCap INT,
+    @MaSoThue VARCHAR(20),
+    @MaPhong VARCHAR(10),
+	@MatKhau VARCHAR(20),
+	@ChucVu VARCHAR(50)
+as
+begin
+	declare @MatKhau_encrypted  VARBINARY(max)
+	declare @Luong_encrypted VARBINARY(max)
+	declare @PhuCap_encrypted VARBINARY(max)
+
+	set @MatKhau_encrypted  = HASHBYTES('SHA1',@MatKhau)
+
+    CREATE SYMMETRIC KEY SK_NHANVIEN
+    WITH algorithm = AES_256
+    ENCRYPTION BY PASSWORD = 'nhom6';
+
+    OPEN SYMMETRIC KEY SK_NHANVIEN
+    DECRYPTION BY PASSWORD = 'nhom6';
+		SET @Luong_encrypted= ENCRYPTBYKEY(KEY_GUID('SK_NHANVIEN'),cast(@Luong as varchar))
+		SET @PhuCap_encrypted= ENCRYPTBYKEY(KEY_GUID('SK_NHANVIEN'),cast(@PhuCap as varchar))
+    CLOSE SYMMETRIC KEY SK_NHANVIEN;
+
+	INSERT INTO NHANVIEN(MaNV, HoTen, Phai, NgaySinh, SoDienThoai, Luong, PhuCap, MaSoThue, MaPhong, MatKhau, ChucVu)
+	VALUES (@MaNV, @HoTen, @Phai, @NgaySinh, @SoDienThoai, @Luong_encrypted, @PhuCap_encrypted, @MaSoThue, @MaPhong, @MatKhau_encrypted, @ChucVu)
+END
+GO
+
+execute SP_IN_NHANVIEN 'NV0001', N'Trần Nguyên Khang', N'Nam', '09-28-2003', '0123456789', 25000000, 3000000, '0123456789', 'GiamDoc', '123456','GiamDocRole'
+
+--dang nhap
+-- drop proc SP_SE_NHANVIENDANGNHAP
+create proc SP_SE_NHANVIENDANGNHAP
+	@MaNV VARCHAR(10),
+	@MatKhau VARCHAR(20),
+	@ChucVu VARCHAR(50)
+as
+begin
+    if exists(select MaNV from NHANVIEN where MaNV=@MaNV and ChucVu=@ChucVu and MatKhau= HASHBYTES('SHA1',@MatKhau))
+		begin
+			--trả về MaNV và CHucVu
+			SELECT 'ThanhCong' as DangNhap ;select @MaNV AS MaNV, @ChucVu AS ChucVu;
+		end
+		else
+		begin
+			select 'ThatBai' as Message;
+		end
+end
+
+execute SP_SE_NHANVIENDANGNHAP 'NV0001', '123456', 'GiamDocRole'

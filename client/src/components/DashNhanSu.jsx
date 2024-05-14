@@ -48,7 +48,7 @@ export default function DashNhanSu() {
               <Table.Cell>{nv.MaNV ? nv.MaNV : "đã ẩn"}</Table.Cell>
 
               <Table.Cell>{nv.HoTen ? nv.HoTen : "đã ẩn"}</Table.Cell>
-              <Table.Cell>{nv.GioiTinh ? nv.GioiTinh : "đã ẩn"}</Table.Cell>
+              <Table.Cell>{nv.Phai || "đã ẩn"}</Table.Cell>
               <Table.Cell>
                 {nv.NgaySinh
                   ? new Date(nv.NgaySinh).toLocaleDateString()

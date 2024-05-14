@@ -1,5 +1,5 @@
 import { Sidebar } from "flowbite-react";
-import { HiUser, HiArrowSmRight } from "react-icons/hi";
+import { HiUser, HiArrowSmRight, HiUserGroup } from "react-icons/hi";
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 
@@ -26,6 +26,15 @@ export default function DashSidebar() {
               as="div"
             >
               Thông tin cá nhân
+            </Sidebar.Item>
+          </Link>
+          <Link to="/dashboard?tab=nhansu">
+            <Sidebar.Item
+              icon={HiUserGroup}
+              className="cursor-pointer"
+              as="div"
+            >
+              Danh sách nhân viên
             </Sidebar.Item>
           </Link>
           <Sidebar.Item

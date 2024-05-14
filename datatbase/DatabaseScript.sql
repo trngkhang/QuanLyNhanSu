@@ -211,6 +211,10 @@ GRANT SELECT ON NhanVien TO NhanVienTaiVuRole;
 -- Giám đốc: xem tất cả thông tin nhưng chỉ sửa lương, phụ cấp
 GRANT SELECT ON NhanVien TO GiamDocRole;
 GRANT UPDATE ON NhanVien(Luong, PhuCap) TO GiamDocRole;
+execute as login = 'nhanvien1'
+SELECT 
+    CURRENT_USER AS 'Tên đăng nhập hiện tại',
+    USER_NAME() AS 'Vai trò hiện tại';
 
 CREATE LOGIN nhanvien1 with password ='nhanvien1';
 CREATE LOGIN truongphong1 with password ='truongphong1';
@@ -242,3 +246,47 @@ ALTER ROLE GiamDocRole ADD MEMBER giamdoc;
     WHERE up.name = @CurrentUser;
 	go
 	print @UserRole;
+
+
+CREATE OR ALTER PROCEDURE SP_SE_NHANVIEN
+AS
+BEGIN
+    BEGIN TRY
+        BEGIN TRANSACTION; -- Bắt đầu transaction
+
+        -- Open the symmetric key
+        OPEN SYMMETRIC KEY SK_NHANVIEN
+        DECRYPTION BY PASSWORD = 'nhom6';
+
+        -- Select the decrypted data
+        SELECT 
+            MaNV, 
+            HoTen, 
+            Phai, 
+            NgaySinh, 
+            SoDienThoai, 
+            CAST(DECRYPTBYKEY(Luong) AS VARCHAR(20)) AS Luong,
+            CAST(DECRYPTBYKEY(PhuCap) AS VARCHAR(20)) AS PhuCap,
+            MaSoThue,
+            MaChV,
+            MaPhong
+        FROM 
+            NHANVIEN;
+
+        -- Close the symmetric key
+        CLOSE SYMMETRIC KEY SK_NHANVIEN;
+
+        -- Indicate success
+        SELECT 'ThanhCong' AS TruyVan;
+
+        COMMIT TRANSACTION; -- Commit the transaction if no errors
+    END TRY
+    BEGIN CATCH
+        ROLLBACK TRANSACTION; -- Roll back the transaction if an error occurs
+        SELECT 'ThatBai' AS TruyVan, ERROR_MESSAGE() AS ThongBao; -- Return the error message
+    END CATCH
+END;
+GO
+
+
+-- execute SP_SE_NHANVIEN

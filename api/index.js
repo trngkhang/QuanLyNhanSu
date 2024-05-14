@@ -2,7 +2,7 @@ import express from "express";
 import sqlConnection from "./config/database.js";
 import authRoutes from "./routes/auth.route.js";
 import adminRoutes from "./routes/admin.route.js";
-
+import nhanVienRoutes from "./routes/nhanvien.route.js";
 const app = express();
 
 app.use(express.json());
@@ -17,6 +17,7 @@ sqlConnection()
 
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/nhanvien", nhanVienRoutes);
 
 app.listen(3000, () => {
   console.log("Server is running on port 3000");

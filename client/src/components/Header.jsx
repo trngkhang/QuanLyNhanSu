@@ -2,12 +2,31 @@ import { Avatar, Button, Dropdown, Navbar, TextInput } from "flowbite-react";
 import { Link, useLocation } from "react-router-dom";
 import { AiOutlineSearch } from "react-icons/ai";
 import { FaMoon } from "react-icons/fa";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { signoutSuccess } from "../redux/user/userSlice";
 
 export default function Header() {
   const path = useLocation().pathname;
+  const dispatch = useDispatch();
   const { nhanVien } = useSelector((state) => state.user);
-  console.log(nhanVien);
+
+  const handleSignout = async () => {
+    try {
+      const res = await fetch("/api/auth/dangxuat", {
+        method: "POST",
+      });
+      const data = res.json();
+      console.log(res.ok);
+      if (!res.ok) {
+        console.log(data.message);
+      } else {
+        dispatch(signoutSuccess());
+      }
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
   return (
     <Navbar className="border-b-2">
       <Link
@@ -17,7 +36,7 @@ export default function Header() {
         <span className="px-2 py-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-lg text-white">
           Nhóm 6
         </span>
-        Quản lý nhân viên
+        Quản lý nhân sự
       </Link>
       <form>
         <TextInput
@@ -56,7 +75,7 @@ export default function Header() {
               <Dropdown.Item>Profile</Dropdown.Item>
             </Link> */}
             <Dropdown.Divider />
-            <Dropdown.Item>Đăng xuất</Dropdown.Item>
+            <Dropdown.Item onClick={handleSignout}>Đăng xuất</Dropdown.Item>
           </Dropdown>
         ) : (
           <Link to="/dangnhap">

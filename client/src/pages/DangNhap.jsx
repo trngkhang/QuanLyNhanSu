@@ -25,7 +25,7 @@ export default function DangNhap() {
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.maNV || !formData.matKhau || !formData.chucVu) {
+    if (!formData.maNV || !formData.matKhau) {
       return dispatch(signInFailure("Please fill out all fields."));
     }
     try {
@@ -37,7 +37,7 @@ export default function DangNhap() {
       });
       const data = await res.json();
       console.log(data[1][0]);
-      if (data[0][0].DangNhap === "ThanhCong") {
+      if (data[0][0].TruyVan === "ThanhCong") {
         dispatch(signInSuccess(data[1][0]));
         navigate("/");
         return;
@@ -58,9 +58,9 @@ export default function DangNhap() {
             <span className="px-2 py-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-lg text-white">
               Nhóm 6
             </span>
-            Quản lý nhân viên
+            Quản lý nhân sự
           </Link>
-          <p className="text-sm mt-5">Quản lý nhân viên cho doanh nghiệp.</p>
+          <p className="text-sm mt-5">Quản lý nhân sự cho doanh nghiệp.</p>
         </div>
         {/* right */}
 
@@ -86,30 +86,7 @@ export default function DangNhap() {
                 onChange={handleChange}
               />
             </div>
-            <div>
-              {" "}
-              <div className="mb-2 block">
-                <Label htmlFor="chucVu" value="Chức vụ" />
-              </div>
-              <Select id="chucVu" required onChange={handleChange}>
-                <option value="">chức vụ của bạn</option>
-                <option value="NhanVienRole">Nhân viên</option>
-                <option value="NhanVienNhanSuRole">
-                  Nhân viên phòng nhân sự
-                </option>
-                <option value="NhanVienTaiVuRole">
-                  Nhân viên phòng tài vụ
-                </option>
-                <option value="TruongPhongRole">Trưởng phòng</option>
-                <option value="TruongPhongNhanSuRole">
-                  Trưởng phòng phòng nhân sự
-                </option>
-                <option value="TruongPhongTaiVuRole">
-                  Trưởng phòng phòng tài vụ
-                </option>
-                <option value="GiamDocRole">Giám Đốc</option>
-              </Select>
-            </div>
+
             <Button
               gradientDuoTone="purpleToPink"
               type="submit"
@@ -121,7 +98,7 @@ export default function DangNhap() {
                   <span className="pl-3">Loading...</span>
                 </>
               ) : (
-                "Sign In"
+                "Đăng nhập"
               )}
             </Button>
           </form>

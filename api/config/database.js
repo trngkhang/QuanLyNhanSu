@@ -4,7 +4,7 @@ const sqlConfig = {
   //yeu cau cau hinh tai khan sa
   user: "sa",
   password: "123456",
-  database: "QuanLyNhanVien",
+  database: "QLNS",
   server: "localhost",
   options: {
     encrypt: true, // for azure

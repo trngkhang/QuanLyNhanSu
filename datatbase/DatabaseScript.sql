@@ -64,19 +64,6 @@ ALTER TABLE TAIKHOAN ADD CONSTRAINT FK_TAIKHOAN_NHANVIEN
 FOREIGN KEY (MaNV) REFERENCES NHANVIEN(MaNV);
 GO
 
-insert into NHANVIEN(HoTen, Phai, NgaySinh, SoDienThoai, MaSoThue) values
-( N'Đoàn Văn Hậu', N'Nam', '03-12-1999', '0123456789', '0123456789'),
-( N'Bùi Tấn Trường', N'Nam', '01-16-1995', '0123456789', '0123456789')
-
-go
--- select * from NHANVIEN
-
-insert into TAIKHOAN(MaNV) values
-( 100000 ),
-( 100001 )
-
-go
--- select * from TAIKHOAN
 
 insert into PHONGBAN(TenPhong) values
 (N'Phòng nhân sự'),
@@ -93,93 +80,6 @@ insert into CHUCVU(TenChV) values
 
 Go
 -- select * from CHUCVU
---tao các Role
-
---role dung de dang nhap vao cac tai khoan
--- 1 login chỉ có 1 user
-create login QLNS_login with password='QLNS_login';
-go
-
-CREATE USER QLNS_login FOR LOGIN QLNS_login
-GO
-
--- gan quyen chi xem table TAIKHOAN cho viec dang nhap
-GRANT SELECT ON TAIKHOAN TO QLNS_login
-GO
--- Cấp quyền IMPERSONATE cho người dùng (login nguoi dung khac)
-GRANT IMPERSONATE ANY LOGIN TO QLNS_login;
-GRANT SELECT ON QuanLyNhanSu4.TAIKHOAN TO QLNS_login;
---GRANT EXECUTE ON dn TO QLNS_login;
--- execute as user = '100003' ;
--- execute as login = 'QLNS_login' ;
-
-go
-revert;
-go
-
--- xem user dang dang nhap hien tai
-SELECT * FROM sys.dm_exec_sessions WHERE is_user_process = 1;
-
-
--- dang nhap
--- drop proc SP_SE_NHANVIENDANGNHAP
-CREATE PROCEDURE SP_SE_NHANVIENDANGNHAP
-    @MaNV VARCHAR(10),
-    @MatKhau VARCHAR(20)
-AS
-BEGIN
-    BEGIN TRY
-        BEGIN TRANSACTION; -- Bắt đầu transaction
-
-        DECLARE @TruyVan NVARCHAR(50);
-        DECLARE @ThongBao NVARCHAR(100);
-
-        IF EXISTS(SELECT MaNV FROM TAIKHOAN WHERE MaNV = @MaNV AND MatKhau = HASHBYTES('SHA2_512', @MatKhau))
-        BEGIN
-            -- Truy cập với quyền của nhân viên
-            --EXECUTE AS USER = CAST(@MaNV AS VARCHAR);
-            -- Lưu thông tin đăng nhập
-            SET @TruyVan = 'ThanhCong';
-            SET @ThongBao = @MaNV;
-        END
-        ELSE
-        BEGIN
-            SET @TruyVan = 'ThatBai';
-            SET @ThongBao = N'Sai tài khoản hoặc mật khẩu';
-        END
-
-        SELECT @TruyVan AS TruyVan, @ThongBao AS MaNV; -- Trả về kết quả
-
-        COMMIT TRANSACTION; -- Áp dụng transaction
-    END TRY
-    BEGIN CATCH
-            ROLLBACK TRANSACTION; -- Hủy bỏ transaction nếu có lỗi
-        SELECT 'ThatBai' AS TruyVan, ERROR_MESSAGE() AS ThongBao; -- Trả về lỗi
-    END CATCH
-END;
-GO
-
--- execute SP_SE_NHANVIENDANGNHAP 100003, 'password100003'
-
---dang xuat
--- drop proc SP_SE_NHANVIENDANGXUAT
-create proc SP_SE_NHANVIENDANGXUAT
-as
-begin
-		begin try
-			BEGIN TRANSACTION; -- Bắt đầu transaction
-				REVERT;
-				execute as login = 'QLNS_login'
-			COMMIT TRANSACTION; -- Áp dụng transaction
-		end try
-		begin catch
-		ROLLBACK TRANSACTION; -- Hủy bỏ transaction nếu có lỗi
-		select 'ThatBai' as TruyVan, ERROR_MESSAGE() as ThongBao --tra ve 
-		end catch
-end
-
-
-execute SP_SE_NHANVIENDANGNHAP 100002, 'password100002'
 
 
 -- tao khóa cho SP_IN_NHANVIEN
@@ -227,14 +127,6 @@ BEGIN
         INSERT INTO TAIKHOAN (MaNV, MatKhau)
         VALUES (@MaNV, @MatKhau_encrypted);
 
-		--sử dụng dynamic SQL để tạo các đối tượng đăng nhập và người dùng
-        DECLARE @DynamicSQL NVARCHAR(MAX);
-        SET @DynamicSQL = 'CREATE LOGIN ' + QUOTENAME(CAST(@MaNV AS NVARCHAR(10))) + ' WITH PASSWORD = ''' + CAST(@MaNV AS NVARCHAR(10)) + ''';';
-        EXEC sp_executesql @DynamicSQL;
-
-        SET @DynamicSQL = 'CREATE USER ' + QUOTENAME(CAST(@MaNV AS NVARCHAR(10))) + ' FOR LOGIN ' + QUOTENAME(CAST(@MaNV AS NVARCHAR(10))) + ';';
-        EXEC sp_executesql @DynamicSQL;
-
         SELECT 'ThanhCong' AS TruyVan; -- trả về
 
         COMMIT TRANSACTION; -- Áp dụng transaction nếu không có lỗi
@@ -252,13 +144,101 @@ execute SP_IN_NHANVIEN  N'Trần Đình Trọng', N'Nam', '03-27-1998', '0123456
 execute SP_IN_NHANVIEN  N'Đoàn Văn Hậu', N'Nam', '03-12-1999', '0123456789', 20000000,4000000, '0123456789', 101, 101
 execute SP_IN_NHANVIEN  N'Bùi Tấn Trường', N'Nam', '01-16-1995', '0123456789', 16000000, 2000000, '0123456789', 102, 101
 
-SELECT * FROM sys.dm_exec_sessions;
 
--- Tạo các role
+CREATE OR ALTER PROCEDURE SP_SE_NHANVIENDANGNHAP
+    @MaNV VARCHAR(10),
+    @MatKhau VARCHAR(20)
+AS
+BEGIN
+    BEGIN TRY
+        BEGIN TRANSACTION; -- Bắt đầu transaction
+
+        DECLARE @TruyVan NVARCHAR(50);
+        DECLARE @ThongBao NVARCHAR(100);
+
+        IF EXISTS(SELECT MaNV FROM TAIKHOAN WHERE MaNV = @MaNV AND MatKhau = HASHBYTES('SHA2_512', @MatKhau))
+        BEGIN
+            -- Truy cập với quyền của nhân viên
+            --EXECUTE AS USER = CAST(@MaNV AS VARCHAR);
+            -- Lưu thông tin đăng nhập
+            SET @TruyVan = 'ThanhCong';
+            SET @ThongBao = @MaNV;
+        END
+        ELSE
+        BEGIN
+            SET @TruyVan = 'ThatBai';
+            SET @ThongBao = N'Sai tài khoản hoặc mật khẩu';
+        END
+
+        SELECT @TruyVan AS TruyVan; select @ThongBao AS MaNV; -- Trả về kết quả
+
+        COMMIT TRANSACTION; -- Áp dụng transaction
+    END TRY
+    BEGIN CATCH
+            ROLLBACK TRANSACTION; -- Hủy bỏ transaction nếu có lỗi
+        SELECT 'ThatBai' AS TruyVan, ERROR_MESSAGE() AS ThongBao; -- Trả về lỗi
+    END CATCH
+END;
+GO
+
+-- execute SP_SE_NHANVIENDANGNHAP 100003, 'password100003'
+
 CREATE ROLE NhanVienRole;
 CREATE ROLE TruongPhongRole;
 CREATE ROLE NhanVienNhanSuRole;
 CREATE ROLE TruongPhongNhanSuRole;
 CREATE ROLE NhanVienTaiVuRole;
 CREATE ROLE GiamDocRole;
-CREATE ROLE AdminROle;
+
+-- Nhân viên: xem nhưng không thêm, xóa, sửa thông tin nhân viên cùng phòng trừ lương, phụ cấp
+GRANT SELECT ON NhanVien TO NhanVienRole;
+DENY INSERT, UPDATE, DELETE ON NhanVien TO NhanVienRole;
+
+-- Trưởng phòng: xem không giới hạn nhưng không thay đổi
+GRANT SELECT ON NhanVien TO TruongPhongRole;
+DENY INSERT, UPDATE, DELETE ON NhanVien TO TruongPhongRole;
+
+-- Nhân viên phòng nhân sự: thêm, sửa thông tin nhân viên (trừ nhân sự)
+GRANT SELECT, INSERT, UPDATE ON NhanVien TO NhanVienNhanSuRole;
+DENY UPDATE ON NhanVien(Luong, PhuCap) TO NhanVienNhanSuRole;
+
+-- Trưởng phòng nhân sự: xem và chỉnh sửa thông tin của mọi nhân viên
+GRANT SELECT, INSERT, UPDATE ON NhanVien TO TruongPhongNhanSuRole;
+
+-- Nhân viên phòng tài vụ: xem thông tin trong cùng phòng
+GRANT SELECT ON NhanVien TO NhanVienTaiVuRole;
+
+-- Giám đốc: xem tất cả thông tin nhưng chỉ sửa lương, phụ cấp
+GRANT SELECT ON NhanVien TO GiamDocRole;
+GRANT UPDATE ON NhanVien(Luong, PhuCap) TO GiamDocRole;
+
+CREATE LOGIN nhanvien1 with password ='nhanvien1';
+CREATE LOGIN truongphong1 with password ='truongphong1';
+CREATE LOGIN nhansu1 with password ='nhansu1';
+CREATE LOGIN truongphongnhansu with password ='truongphongnhansu';
+CREATE LOGIN taivu1 with password ='taivu1';
+CREATE LOGIN giamdoc with password ='giamdoc';
+
+CREATE USER nhanvien1 FOR LOGIN nhanvien1;
+CREATE USER truongphong1 FOR LOGIN truongphong1;
+CREATE USER nhansu1 FOR LOGIN nhansu1;
+CREATE USER truongphongnhansu FOR LOGIN truongphongnhansu;
+CREATE USER taivu1 FOR LOGIN taivu1;
+CREATE USER giamdoc FOR LOGIN giamdoc;
+
+ALTER ROLE NhanVienRole ADD MEMBER nhanvien1;
+ALTER ROLE TruongPhongRole ADD MEMBER truongphong1;
+ALTER ROLE NhanVienNhanSuRole ADD MEMBER nhansu1;
+ALTER ROLE TruongPhongNhanSuRole ADD MEMBER truongphongnhansu;
+ALTER ROLE NhanVienTaiVuRole ADD MEMBER taivu1;
+ALTER ROLE GiamDocRole ADD MEMBER giamdoc;
+
+    DECLARE @UserRole NVARCHAR(100);
+    DECLARE @CurrentUser NVARCHAR(100) = USER_NAME();
+    SELECT @UserRole = dp.name
+    FROM sys.database_principals dp
+    JOIN sys.database_role_members drm ON dp.principal_id = drm.role_principal_id
+    JOIN sys.database_principals up ON drm.member_principal_id = up.principal_id
+    WHERE up.name = @CurrentUser;
+	go
+	print @UserRole;

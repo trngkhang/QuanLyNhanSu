@@ -8,11 +8,11 @@ export default function DashNhanSu() {
   const [danhsachNhanVien, setDanhsachNhanVien] = useState([]);
   const dispatch = useDispatch();
   const { nhanVien } = useSelector((state) => state.user);
-
+  const role = nhanVien.TenRole;
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const res = await fetch("/api/nhanvien/tatcanhanvien");
+        const res = await fetch(`/api/nhanvien/tatcanhanvien/${role}`);
         const data = await res.json();
         console.log(data);
         if (res.ok) {
@@ -41,6 +41,8 @@ export default function DashNhanSu() {
           <Table.HeadCell>Lương</Table.HeadCell>
           <Table.HeadCell>Phụ cấp</Table.HeadCell>
           <Table.HeadCell>Mã số thuế</Table.HeadCell>
+          <Table.HeadCell>Tên chức vụ</Table.HeadCell>
+          <Table.HeadCell>Tên phòng</Table.HeadCell>
         </Table.Head>
         <Table.Body className="divide-y">
           {danhsachNhanVien.map((nv, index) => (
@@ -49,7 +51,7 @@ export default function DashNhanSu() {
               className="bg-white dark:border-gray-700 dark:bg-gray-800"
             >
               <Table.Cell>{index + 1}</Table.Cell>
-              <Table.Cell>{nv.MaNV ? nv.MaNV : "đã ẩn"}</Table.Cell>
+              <Table.Cell>{nv.MaNhanVien ? nv.MaNhanVien : "đã ẩn"}</Table.Cell>
 
               <Table.Cell>{nv.HoTen ? nv.HoTen : "đã ẩn"}</Table.Cell>
               <Table.Cell>{nv.Phai || "đã ẩn"}</Table.Cell>
@@ -64,6 +66,8 @@ export default function DashNhanSu() {
               <Table.Cell>{nv.Luong ? nv.Luong : "đã ẩn"}</Table.Cell>
               <Table.Cell>{nv.PhuCap ? nv.PhuCap : "đã ẩn"}</Table.Cell>
               <Table.Cell>{nv.MaSoThue ? nv.MaSoThue : "đã ẩn"}</Table.Cell>
+              <Table.Cell>{nv.TenChucVu ? nv.TenChucVu : "đã ẩn"}</Table.Cell>
+              <Table.Cell>{nv.TenPhong ? nv.TenPhong : "đã ẩn"}</Table.Cell>
               {/* <Table.Cell>
                 <Link
                   to={`/suanhanvien/${nv.MaNV}`}

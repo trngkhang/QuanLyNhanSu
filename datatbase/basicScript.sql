@@ -509,6 +509,17 @@ end
 -- execute SP_UPD_NHANVIEN_TruongPhongRole 100000, 21000000, 1500000
 
 
+-- Lấy danh sách các vai trò của người dùng hiện tại trong cơ sở dữ liệu
+SELECT
+    dp.name AS RoleName
+FROM
+    sys.database_role_members drm
+JOIN
+    sys.database_principals dp ON drm.role_principal_id = dp.principal_id
+JOIN
+    sys.database_principals up ON drm.member_principal_id = up.principal_id
+WHERE
+    up.name = USER_NAME()
 
 
 create login 100 with password = 'nv03'

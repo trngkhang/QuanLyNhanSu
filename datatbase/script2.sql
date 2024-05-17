@@ -228,8 +228,8 @@ BEGIN
         VALUES (@MaNV, @MatKhau_encrypted);
 
 		--sử dụng dynamic SQL để tạo các đối tượng đăng nhập và người dùng
-        DECLARE @DynamicSQL NVARCHAR(MAX);
-        SET @DynamicSQL = 'CREATE LOGIN ' + QUOTENAME(CAST(@MaNV AS NVARCHAR(10))) + ' WITH PASSWORD = ''' + CAST(@MaNV AS NVARCHAR(10)) + ''';';
+        --DECLARE @DynamicSQL NVARCHAR(MAX);
+        --SET @DynamicSQL = 'CREATE LOGIN ' + QUOTENAME(CAST(@MaNV AS NVARCHAR(10))) + ' WITH PASSWORD = ''' + CAST(@MaNV AS NVARCHAR(10)) + ''';';
         EXEC sp_executesql @DynamicSQL;
 
         SET @DynamicSQL = 'CREATE USER ' + QUOTENAME(CAST(@MaNV AS NVARCHAR(10))) + ' FOR LOGIN ' + QUOTENAME(CAST(@MaNV AS NVARCHAR(10))) + ';';

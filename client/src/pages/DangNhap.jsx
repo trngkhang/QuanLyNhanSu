@@ -36,7 +36,7 @@ export default function DangNhap() {
         body: JSON.stringify(formData),
       });
       const data = await res.json();
-      console.log(data[1][0]);
+      console.log(data);
       if (data[0][0].TruyVan === "ThanhCong") {
         dispatch(signInSuccess(data[1][0]));
         navigate("/");
@@ -70,7 +70,7 @@ export default function DangNhap() {
               <Label value="Mã nhân viên" />
               <TextInput
                 required
-                type="text"
+                type="number"
                 placeholder="Mã nhân viên của bạn"
                 id="maNV"
                 onChange={handleChange}

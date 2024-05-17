@@ -66,7 +66,7 @@ export default function Header() {
             }
           >
             <Dropdown.Header className=" min-w-40">
-              <span className="block text-sm">@{nhanVien.MaNV}</span>
+              <span className="block text-sm">@{nhanVien.MaNhanVien}</span>
               <span className="block text-sm font-medium truncate">
                 {nhanVien.HoTen}
               </span>
@@ -90,8 +90,8 @@ export default function Header() {
         <Navbar.Link active={path === "/"} as={"div"}>
           <Link to="/">Home</Link>
         </Navbar.Link>
-        <Navbar.Link active={path === "/about"} as={"div"}>
-          <Link to="/about">About</Link>
+        <Navbar.Link active={path === "/dashboard"} as={"div"}>
+          <Link to="/dashboard">Làm việc</Link>
         </Navbar.Link>
       </Navbar.Collapse>
     </Navbar>

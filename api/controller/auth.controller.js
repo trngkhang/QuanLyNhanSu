@@ -3,16 +3,18 @@ import sql from "mssql";
 import jwt from "jsonwebtoken";
 
 export const dangnhap = async (req, res, next) => {
-  const { maNV, matKhau, chucVu } = req.body;
+  const { maNV, matKhau } = req.body;
   if (!maNV || !matKhau || maNV === "" || matKhau === "") {
     return next(errorHandler(400, "All fields are required"));
   }
   try {
     console.log("req.body", req.body);
-    const result =
-      await sql.query`execute SP_SE_NHANVIENDANGNHAP ${maNV}, ${matKhau}`;
+    const result = await sql.query`execute SP_SEL_DANGNHAP ${maNV}, ${matKhau}`;
     console.log("result", result);
     if (result.recordsets[0][0].TruyVan === "ThanhCong") {
+      const maNVStr = String(maNV);
+      const result_login = await sql.query`execute as login = ${maNVStr}`;
+      console.log("result_login", result_login);
       const token = jwt.sign({ maNV: maNV }, "jwt");
       return res
         .status(200)

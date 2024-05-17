@@ -143,7 +143,7 @@ execute SP_IN_NHANVIEN  N'Nguyễn Văn Toản', N'Nam', '03-12-1999', '01234567
 execute SP_IN_NHANVIEN  N'Trần Đình Trọng', N'Nam', '03-27-1998', '0123456789', 25000000, 3000000, '0123456789', 102, 101
 execute SP_IN_NHANVIEN  N'Đoàn Văn Hậu', N'Nam', '03-12-1999', '0123456789', 20000000,4000000, '0123456789', 101, 101
 execute SP_IN_NHANVIEN  N'Bùi Tấn Trường', N'Nam', '01-16-1995', '0123456789', 16000000, 2000000, '0123456789', 102, 101
-
+execute SP_IN_NHANVIEN  N'Mai Đức Chung', N'Nam', '06-21-1951', '0123456789', 50000000, 5500000, '0123456789', 102, 101
 
 CREATE OR ALTER PROCEDURE SP_SE_NHANVIENDANGNHAP
     @MaNV VARCHAR(10),
@@ -290,3 +290,196 @@ GO
 
 
 -- execute SP_SE_NHANVIEN
+
+
+create login nv01 with password='nv01';
+create user nv01 for login nv01;
+ALTER ROLE NhanVien ADD MEMBER nv01;
+execute as login = 'nv01'
+SELECT * from NhanVien_ThongTin --xem view
+SELECT * FROM sys.dm_exec_sessions WHERE is_user_process = 1;
+revert
+-- Create the NhanVien role
+CREATE ROLE NhanVien;
+GO
+
+-- Create a view to hide salary and allowances with schema binding
+CREATE or alter VIEW dbo.NhanVien_ThongTin
+WITH SCHEMABINDING
+AS
+SELECT 
+    MaNV,
+    HoTen,
+    Phai,
+    NgaySinh,
+    SoDienThoai,
+    MaSoThue,
+    MaChV,
+    MaPhong
+FROM 
+    dbo.NHANVIEN;
+GO
+
+-- Grant SELECT on the view to the NhanVien role
+GRANT SELECT ON dbo.NhanVien_ThongTin TO NhanVien;
+GO
+
+-- Add an example user to the NhanVien role (replace 'example_user' with actual user login)
+-- EXEC sp_addrolemember 'NhanVien', 'example_user';
+-- GO
+
+-- Create a function for Row-Level Security
+CREATE or alter FUNCTION dbo.fn_FilterEmployees
+RETURNS TABLE
+WITH SCHEMABINDING
+AS
+RETURN
+(
+    SELECT 1 AS fn_FilterEmployees
+    FROM dbo.NHANVIEN AS nv
+    WHERE nv.MaNV = @MaNV OR nv.MaPhong = (SELECT MaPhong FROM dbo.NHANVIEN WHERE MaNV = @MaNV)
+);
+GO
+
+-- Create a security policy for Row-Level Security
+CREATE SECURITY POLICY EmployeeFilterPolicy
+ADD FILTER PREDICATE dbo.fn_FilterEmployees(MaNV) ON dbo.NhanVien_ThongTin;
+GO
+select dbo.fn_FilterEmployees(nv01) as kq
+
+
+CREATE or alter VIEW VI_NHANVIEN_nvrole
+AS
+SELECT 
+    MaNV,
+    HoTen,
+    Phai,
+    NgaySinh,
+    SoDienThoai,
+    MaSoThue,
+    MaChV,
+    MaPhong
+FROM 
+    NHANVIEN;
+GO
+
+create or alter proc SP_SEL_NHANVIEN
+as
+begin
+    BEGIN TRY
+        BEGIN TRANSACTION; -- Bắt đầu transaction
+
+		DECLARE @nvrole VARCHAR(20);
+
+	-- Lấy các vai trò của người dùng hiện tại trong cơ sở dữ liệu
+SELECT TOP 1 @nvrole = roles.name
+FROM  sys.database_role_members AS drm
+	JOIN sys.database_principals AS roles ON drm.role_principal_id = roles.principal_id
+	JOIN sys.database_principals AS members ON drm.member_principal_id = members.principal_id
+WHERE members.name = USER_NAME();
+
+
+        -- Open the symmetric key
+        OPEN SYMMETRIC KEY SK_NHANVIEN
+        DECRYPTION BY PASSWORD = 'nhom6';
+
+		if( @nvrole = 'NhanVienRole')
+		begin
+			select * from VI_NHANVIEN_nvrole where USER_NAME()= MaNV and MaPhong = (select 1 from VI_NHANVIEN_nvrole
+		end
+
+        -- Select the decrypted data
+        SELECT 
+            MaNV, 
+            HoTen, 
+            Phai, 
+            NgaySinh, 
+            SoDienThoai, 
+            CAST(DECRYPTBYKEY(Luong) AS VARCHAR(20)) AS Luong,
+            CAST(DECRYPTBYKEY(PhuCap) AS VARCHAR(20)) AS PhuCap,
+            MaSoThue,
+            MaChV,
+            MaPhong
+        FROM 
+            NHANVIEN;
+
+        -- Close the symmetric key
+        CLOSE SYMMETRIC KEY SK_NHANVIEN;
+
+        -- Indicate success
+        SELECT 'ThanhCong' AS TruyVan;
+
+        COMMIT TRANSACTION; -- Commit the transaction if no errors
+    END TRY
+    BEGIN CATCH
+        ROLLBACK TRANSACTION; -- Roll back the transaction if an error occurs
+        SELECT 'ThatBai' AS TruyVan, ERROR_MESSAGE() AS ThongBao; -- Return the error message
+    END CATCH
+end
+
+
+DECLARE @nvrole VARCHAR(20);
+
+-- Lấy các vai trò của người dùng hiện tại trong cơ sở dữ liệu
+SELECT TOP 1 @nvrole = roles.name
+FROM 
+    sys.database_role_members AS drm
+JOIN 
+    sys.database_principals AS roles ON drm.role_principal_id = roles.principal_id
+JOIN 
+    sys.database_principals AS members ON drm.member_principal_id = members.principal_id
+WHERE 
+    members.name = USER_NAME();
+
+-- Hiển thị giá trị của biến nvrole
+print @nvrole 
+
+
+create or alter proc SP_UPD_NHANVIEN
+    @HoTen NVARCHAR(100),
+    @Phai NVARCHAR(3),
+    @NgaySinh DATE,
+    @SoDienThoai VARCHAR(15),
+    @Luong INT,
+    @PhuCap INT,
+    @MaSoThue VARCHAR(20),
+    @MaChV INT,
+    @MaPhong INT
+AS
+BEGIN
+    BEGIN TRY
+        BEGIN TRANSACTION; -- Bắt đầu transaction
+
+        DECLARE @Luong_encrypted VARBINARY(max);
+        DECLARE @PhuCap_encrypted VARBINARY(max);
+
+        OPEN SYMMETRIC KEY SK_NHANVIEN
+        DECRYPTION BY PASSWORD = 'nhom6';
+        SET @Luong_encrypted = ENCRYPTBYKEY(KEY_GUID('SK_NHANVIEN'), CAST(@Luong AS VARCHAR));
+        SET @PhuCap_encrypted = ENCRYPTBYKEY(KEY_GUID('SK_NHANVIEN'), CAST(@PhuCap AS VARCHAR));
+        CLOSE SYMMETRIC KEY SK_NHANVIEN;
+
+        INSERT INTO NHANVIEN (HoTen, Phai, NgaySinh, SoDienThoai, Luong, PhuCap, MaSoThue, MaChV, MaPhong)
+        VALUES (@HoTen, @Phai, @NgaySinh, @SoDienThoai, @Luong_encrypted, @PhuCap_encrypted, @MaSoThue, @MaChV, @MaPhong);
+
+        -- Lấy mã nhân viên vừa được tạo mới
+        DECLARE @MaNV INT;
+        SET @MaNV = SCOPE_IDENTITY();
+
+        -- Tạo mới tài khoản cho nhân viên
+        DECLARE @MatKhau_encrypted VARBINARY(max);
+        SET @MatKhau_encrypted = HASHBYTES('SHA2_512', 'password' + CAST(@MaNV AS VARCHAR(10)));
+
+        INSERT INTO TAIKHOAN (MaNV, MatKhau)
+        VALUES (@MaNV, @MatKhau_encrypted);
+
+        SELECT 'ThanhCong' AS TruyVan; -- trả về
+
+        COMMIT TRANSACTION; -- Áp dụng transaction nếu không có lỗi
+    END TRY
+    BEGIN CATCH
+        ROLLBACK TRANSACTION; -- Hủy bỏ transaction nếu có lỗi
+        SELECT 'ThatBai' AS TruyVan, ERROR_MESSAGE() AS ThongBao; -- trả về lỗi
+    END CATCH
+END
+GO

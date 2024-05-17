@@ -3,8 +3,10 @@ import sql from "mssql";
 
 export const tatcanhanvien = async (req, res, next) => {
   try {
-    const result = await sql.query`execute SP_SE_NHANVIEN`;
-    console.log(result.recordsets[1][0].TruyVan);
+    const result2 = await sql.query`select user_name()`;
+    console.log(result2);
+    const result = await sql.query`execute SP_SEL_NHANVIEN_NhanVienRole`;
+    console.log(result);
     // if (result.recordsets[1][0].TruyVan === "ThanhCong") {
     //   return res.status(200).json(result.recordsets[0]);
     // }

@@ -2,8 +2,8 @@ import sql from "mssql";
 
 const sqlConfig = {
   //yeu cau cau hinh tai khan sa
-  user: "sa",
-  password: "123456",
+  user: "QLNS_Login",
+  password: "QLNS_Login",
   database: "QLNS",
   server: "localhost",
   options: {

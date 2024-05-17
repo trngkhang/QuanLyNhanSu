@@ -1,11 +1,13 @@
 import { Button, Modal, Table } from "flowbite-react";
 import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { HiOutlineExclamationCircle } from "react-icons/hi";
 
 export default function DashNhanSu() {
-  const [nhanVien, setNhanVien] = useState([]);
+  const [danhsachNhanVien, setDanhsachNhanVien] = useState([]);
+  const dispatch = useDispatch();
+  const { nhanVien } = useSelector((state) => state.user);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -14,7 +16,7 @@ export default function DashNhanSu() {
         const data = await res.json();
         console.log(data);
         if (res.ok) {
-          setNhanVien(data);
+          setDanhsachNhanVien(data);
         }
       } catch (error) {
         console.log(error.message);
@@ -25,6 +27,9 @@ export default function DashNhanSu() {
 
   return (
     <div className="table-auto overflow-x-scroll md:mx-auto p-3 scrollbar scrollbar-track-slate-100 scrollbar-thumb-slate-300 dark:scrollbar-track-slate-700 dark:scrollbar-thumb-slate-500">
+      <h1 className=" text-3xl font-semibold text-center py-7">
+        Danh sách thông tin nhân viên
+      </h1>
       <Table hoverable className="shadow-md">
         <Table.Head>
           <Table.HeadCell>STT</Table.HeadCell>
@@ -36,10 +41,9 @@ export default function DashNhanSu() {
           <Table.HeadCell>Lương</Table.HeadCell>
           <Table.HeadCell>Phụ cấp</Table.HeadCell>
           <Table.HeadCell>Mã số thuế</Table.HeadCell>
-          <Table.HeadCell>Edit</Table.HeadCell>
         </Table.Head>
         <Table.Body className="divide-y">
-          {nhanVien.map((nv, index) => (
+          {danhsachNhanVien.map((nv, index) => (
             <Table.Row
               key={`${nv.MaNV}-${index}`}
               className="bg-white dark:border-gray-700 dark:bg-gray-800"
@@ -60,14 +64,14 @@ export default function DashNhanSu() {
               <Table.Cell>{nv.Luong ? nv.Luong : "đã ẩn"}</Table.Cell>
               <Table.Cell>{nv.PhuCap ? nv.PhuCap : "đã ẩn"}</Table.Cell>
               <Table.Cell>{nv.MaSoThue ? nv.MaSoThue : "đã ẩn"}</Table.Cell>
-              <Table.Cell>
+              {/* <Table.Cell>
                 <Link
                   to={`/suanhanvien/${nv.MaNV}`}
                   className="text-teal-500 hover:underline"
                 >
                   Sửa
                 </Link>
-              </Table.Cell>
+              </Table.Cell> */}
             </Table.Row>
           ))}
         </Table.Body>

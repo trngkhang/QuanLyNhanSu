@@ -7,6 +7,7 @@ import DangNhap from "./pages/DangNhap";
 import Dashboard from "./pages/Dashboard";
 import PrivateRoute from "./components/PrivateRoute";
 import SuaNhanVien from "./pages/SuaNhanVien";
+import ThemNhanVien from "./pages/ThemNhanVien";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         <Route element={<PrivateRoute />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/suanhanvien/:nhanvienId" element={<SuaNhanVien />} />
+          <Route path="/themnhanvien" element={<ThemNhanVien />} />
         </Route>
       </Routes>
       <Footer />

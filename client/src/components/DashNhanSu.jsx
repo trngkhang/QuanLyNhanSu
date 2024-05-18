@@ -43,6 +43,9 @@ export default function DashNhanSu() {
           <Table.HeadCell>Mã số thuế</Table.HeadCell>
           <Table.HeadCell>Tên chức vụ</Table.HeadCell>
           <Table.HeadCell>Tên phòng</Table.HeadCell>
+          {[3, 4, 6].includes(nhanVien.MaChucVu) && (
+            <Table.HeadCell>Chỉnh sửa</Table.HeadCell>
+          )}
         </Table.Head>
         <Table.Body className="divide-y">
           {danhsachNhanVien.map((nv, index) => (
@@ -54,7 +57,7 @@ export default function DashNhanSu() {
               <Table.Cell>{nv.MaNhanVien ? nv.MaNhanVien : "đã ẩn"}</Table.Cell>
 
               <Table.Cell>{nv.HoTen ? nv.HoTen : "đã ẩn"}</Table.Cell>
-              <Table.Cell>{nv.Phai || "đã ẩn"}</Table.Cell>
+              <Table.Cell>{nv.GioiTinh || "đã ẩn"}</Table.Cell>
               <Table.Cell>
                 {nv.NgaySinh
                   ? new Date(nv.NgaySinh).toLocaleDateString()
@@ -68,14 +71,18 @@ export default function DashNhanSu() {
               <Table.Cell>{nv.MaSoThue ? nv.MaSoThue : "đã ẩn"}</Table.Cell>
               <Table.Cell>{nv.TenChucVu ? nv.TenChucVu : "đã ẩn"}</Table.Cell>
               <Table.Cell>{nv.TenPhong ? nv.TenPhong : "đã ẩn"}</Table.Cell>
-              {/* <Table.Cell>
-                <Link
-                  to={`/suanhanvien/${nv.MaNV}`}
-                  className="text-teal-500 hover:underline"
-                >
-                  Sửa
-                </Link>
-              </Table.Cell> */}
+              {(nhanVien.TenChucVu === "Nhân viên phòng nhân sự" ||
+                nhanVien.TenChucVu === "Trưởng phòng nhân sự" ||
+                nhanVien.TenChucVu === "Giám đốc") && (
+                <Table.Cell>
+                  <Link
+                    to={`/suanhanvien/${nv.MaNhanVien}`}
+                    className="text-teal-500 hover:underline"
+                  >
+                    <span>Sửa</span>
+                  </Link>
+                </Table.Cell>
+              )}
             </Table.Row>
           ))}
         </Table.Body>

@@ -1,49 +1,26 @@
-import { Button, Label, TextInput } from "flowbite-react";
-import { Link, useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { Button, Label, Select, TextInput } from "flowbite-react";
+import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 
-export default function SuaNhanVien() {
-  const { nhanvienId } = useParams();
-  console.log(useParams());
-  console.log("nhanvienId", nhanvienId);
-  const [nhanVien, setNhanVien] = useState(null);
+export default function ThemNhanVien() {
   const [formData, setFormData] = useState({});
-  useEffect(() => {
-    const fetchPost = async () => {
-      try {
-        const res = await fetch(
-          `/api/nhanvien/motnhanvien?nhanvienId=${nhanvienId}`
-        );
-        const data = await res.json();
-        console.log("dataaaa", data);
-        setNhanVien(data);
-      } catch (error) {}
-    };
-    fetchPost();
-  }, [nhanvienId]);
+  const navigate = useNavigate();
+
   console.log(formData);
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch(
-        `/api/post/updatepost/${formData._id}/${currentUser._id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formData),
-        }
-      );
+      const res = await fetch("/api/nhanvien/themnhanvien", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
       const data = await res.json();
       console.log(data);
-      if (!res.ok) {
-        setPublishErorr(data.message);
-        return;
-      }
       if (res.ok) {
-        setPublishErorr(null);
-        navigate(`/post/${data.slug}`);
+        navigate(`/dashboard?tab=nhansu`);
       }
     } catch (error) {
       setPublishErorr(error.message);
@@ -52,23 +29,10 @@ export default function SuaNhanVien() {
   return (
     <div className="min-h-screen max-w-3xl mx-auto p-3">
       <h1 className=" text-3xl font-semibold text-center py-7">
-        Chỉnh sửa thông tin nhân viên
+        Tạo mới nhân viên
       </h1>
 
       <form onSubmit={handleSubmit} className="flex max-w-md flex-col gap-4">
-        <div>
-          <div className="mb-2 block">
-            <Label htmlFor="MaNV" value="Mã nhân viên" />
-          </div>
-          <TextInput
-            id="MaNV"
-            type="number"
-            required
-            placeholder="Mã nhân viên"
-            disabled
-            value={nhanVien ? nhanVien.MaNhanVien : "Lỗi"}
-          />
-        </div>
         <div>
           <div className="mb-2 block">
             <Label htmlFor="HoTen" value="Họ tên" />
@@ -79,20 +43,24 @@ export default function SuaNhanVien() {
             required
             maxLength={100}
             placeholder="Họ tên"
-            value={nhanVien ? nhanVien.HoTen : "Lỗi"}
+            onChange={(e) =>
+              setFormData({ ...formData, HoTen: e.target.value })
+            }
           />
         </div>
         <div>
           <div className="mb-2 block">
-            <Label htmlFor="Phai" value="Giới tính" />
+            <Label htmlFor="GioiTinh" value="Giới tính" />
           </div>
           <TextInput
-            id="Phai"
+            id="GioiTinh"
             type="text"
             maxLength={3}
             required
             placeholder="Giới tính"
-            value={nhanVien ? nhanVien.GioiTinh : "Lỗi"}
+            onChange={(e) =>
+              setFormData({ ...formData, GioiTinh: e.target.value })
+            }
           />
         </div>
         <div>
@@ -101,10 +69,12 @@ export default function SuaNhanVien() {
           </div>
           <TextInput
             id="NgaySinh"
-            type="text"
+            type="date"
             required
             placeholder="Họ tên"
-            value={nhanVien ? nhanVien.HoTen : "Lỗi"}
+            onChange={(e) =>
+              setFormData({ ...formData, NgaySinh: e.target.value })
+            }
           />
         </div>
         <div>
@@ -113,11 +83,13 @@ export default function SuaNhanVien() {
           </div>
           <TextInput
             id="SoDienThoai"
-            type="int"
+            type="number"
             maxLength={15}
             required
             placeholder="SĐT"
-            value={nhanVien ? nhanVien.SoDienThoai : "Lỗi"}
+            onChange={(e) =>
+              setFormData({ ...formData, SoDienThoai: e.target.value })
+            }
           />
         </div>
         <div>
@@ -126,11 +98,13 @@ export default function SuaNhanVien() {
           </div>
           <TextInput
             id="Luong"
-            type="int"
+            type="number"
             maxLength={9}
             required
             placeholder="Lương"
-            value={nhanVien ? nhanVien.Luong : "Lỗi"}
+            onChange={(e) =>
+              setFormData({ ...formData, Luong: e.target.value })
+            }
           />
         </div>
         <div>
@@ -139,11 +113,13 @@ export default function SuaNhanVien() {
           </div>
           <TextInput
             id="PhuCap"
-            type="int"
+            type="number"
             maxLength={9}
             required
             placeholder="Phụ cấp"
-            value={nhanVien ? nhanVien.PhuCap : "Lỗi"}
+            onChange={(e) =>
+              setFormData({ ...formData, PhuCap: e.target.value })
+            }
           />
         </div>
         <div>
@@ -156,9 +132,44 @@ export default function SuaNhanVien() {
             maxLength={20}
             required
             placeholder="Mã số thuế"
-            value={nhanVien ? nhanVien.MaSoThue : "Lỗi"}
-            onChange={(value) => setFormData({ ...formData, MaSoThue: value })}
+            onChange={(e) =>
+              setFormData({ ...formData, MaSoThue: e.target.value })
+            }
           />
+        </div>
+        <div>
+          <div className="mb-2 block">
+            <Label htmlFor="TenChucVu" value="Tên chức vụ" />
+          </div>
+          <Select
+            id="TenChucVu"
+            onChange={(e) => {
+              setFormData({ ...formData, MaChucVu: e.target.value });
+            }}
+          >
+            <option value="1">Nhân viên</option>
+            <option value="2">Trưởng phòng</option>
+            <option value="3">Nhân viên phòng nhân sự</option>
+            <option value="4">Trưởng phòng nhân sự</option>
+            <option value="5">Nhân viên phòng tài vụ</option>
+            <option value="6">Giám đốc</option>
+          </Select>
+        </div>
+        <div>
+          <div className="mb-2 block">
+            <Label htmlFor="TenPhong" value="Tên chức vụ" />
+          </div>
+          <Select
+            id="TenPhong"
+            onChange={(e) => {
+              setFormData({ ...formData, MaPhong: e.target.value });
+            }}
+          >
+            <option value="100">Phòng IT</option>
+            <option value="101">Phòng nhân sự</option>
+            <option value="102">Phòng tài vụ</option>
+            <option value="103">Phòng giám đốc</option>
+          </Select>
         </div>
         {/* <div>
           <div className="mb-2 block">

@@ -3,6 +3,7 @@ import { HiUser, HiArrowSmRight, HiUserGroup } from "react-icons/hi";
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+import { HiMiniUserPlus } from "react-icons/hi2";
 
 export default function DashSidebar() {
   const dispatch = useDispatch();
@@ -42,13 +43,18 @@ export default function DashSidebar() {
               Danh sách nhân viên
             </Sidebar.Item>
           </Link>
-          <Sidebar.Item
-            icon={HiArrowSmRight}
-            className="cursor-pointer"
-            as="div"
-          >
-            Sign Out
-          </Sidebar.Item>
+
+          {tenChucVu === "Nhân viên phòng nhân sự" && (
+            <Link to="/themnhanvien">
+              <Sidebar.Item
+                icon={HiMiniUserPlus}
+                className="cursor-pointer"
+                as="div"
+              >
+                Tạo mới nhân viên
+              </Sidebar.Item>
+            </Link>
+          )}
         </Sidebar.ItemGroup>
       </Sidebar.Items>
     </Sidebar>

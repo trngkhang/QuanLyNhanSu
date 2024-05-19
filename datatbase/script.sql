@@ -344,8 +344,10 @@ WHERE nv.MaNhanVien = @MaNhanVien
     END CATCH
 END;
 GO
--- execute SP_SEL_DANGNHAP 100002, 'password100002'
+-- execute SP_SEL_DANGNHAP 100000, 'password100000'
 
+--dang xuất login user hiện tại
+--revert
 
 -- xem thông tin nhân viên với chức vụ nhân viên: xhir xem thông tin nhân viên cùng phòng ban, trừ trường lương và phụ cấp
 create or alter proc SP_SEL_NHANVIEN_NhanVienRole
@@ -645,14 +647,15 @@ GRANT SELECT ON CHUCVU TO NhanVienNhanSuRole;
 GRANT SELECT ON PHONGBAN TO NhanVienNhanSuRole;
 GRANT UPDATE on NHANVIEN  to NhanVienNhanSuRole;
 GRANT INSERT on NHANVIEN  to NhanVienNhanSuRole;
-GRANT ALTER ANY ROLE TO TruongPhongNhanSuRole; -- user gán quyen cho uer khác
+GRANT ALTER ANY ROLE TO NhanVienNhanSuRole; -- user gán quyen cho uer khác
 --cap quyen khoa key
-GRANT VIEW DEFINITION ON SYMMETRIC KEY::SK_NHANVIEN TO TruongPhongNhanSuRole;
-GRANT CONTROL ON SYMMETRIC KEY::SK_NHANVIEN TO TruongPhongNhanSuRole;
+GRANT VIEW DEFINITION ON SYMMETRIC KEY::SK_NHANVIEN TO NhanVienNhanSuRole;
+GRANT CONTROL ON SYMMETRIC KEY::SK_NHANVIEN TO NhanVienNhanSuRole;
 go
-GRANT EXECUTE ON OBJECT::SP_UPD_NHANVIEN TO TruongPhongNhanSuRole;
-GRANT EXECUTE ON OBJECT::SP_SEL_motNHANVIEN TO TruongPhongNhanSuRole;
-GRANT EXECUTE ON OBJECT::SP_INS_NHANVIEN TO TruongPhongNhanSuRole;
+GRANT EXECUTE ON OBJECT::SP_SEL_motNHANVIEN TO NhanVienNhanSuRole;
+GRANT EXECUTE ON OBJECT::SP_SEL_NHANVIEN_NhanVienNhanSuRole TO NhanVienNhanSuRole;
+GRANT EXECUTE ON OBJECT::SP_UPD_NHANVIEN TO NhanVienNhanSuRole;
+GRANT EXECUTE ON OBJECT::SP_INS_NHANVIEN TO NhanVienNhanSuRole;
 go
 
 --======================================================================================
@@ -669,6 +672,7 @@ GRANT VIEW DEFINITION ON SYMMETRIC KEY::SK_NHANVIEN TO TruongPhongNhanSuRole;
 GRANT CONTROL ON SYMMETRIC KEY::SK_NHANVIEN TO TruongPhongNhanSuRole;
 go
 GRANT EXECUTE ON OBJECT::SP_SEL_motNHANVIEN TO TruongPhongNhanSuRole;
+GRANT EXECUTE ON OBJECT::SP_SEL_NHANVIEN_TruongPhongNhanSuRole TO TruongPhongNhanSuRole;
 GRANT EXECUTE ON OBJECT::SP_UPD_NHANVIEN TO TruongPhongNhanSuRole;
 GRANT EXECUTE ON OBJECT::SP_INS_NHANVIEN TO TruongPhongNhanSuRole;
 go

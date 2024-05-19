@@ -29,8 +29,9 @@ export const dangnhap = async (req, res, next) => {
   }
 };
 
-export const dangxuat = (req, res, next) => {
+export const dangxuat = async (req, res, next) => {
   try {
+    const result = await sql.query`revert`;
     return res
       .clearCookie("access_token")
       .status(200)

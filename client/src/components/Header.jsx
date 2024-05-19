@@ -1,5 +1,5 @@
 import { Avatar, Button, Dropdown, Navbar, TextInput } from "flowbite-react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { AiOutlineSearch } from "react-icons/ai";
 import { FaMoon } from "react-icons/fa";
 import { useSelector, useDispatch } from "react-redux";
@@ -9,6 +9,7 @@ export default function Header() {
   const path = useLocation().pathname;
   const dispatch = useDispatch();
   const { nhanVien } = useSelector((state) => state.user);
+  const navigate = useNavigate();
 
   const handleSignout = async () => {
     try {
@@ -21,6 +22,7 @@ export default function Header() {
         console.log(data.message);
       } else {
         dispatch(signoutSuccess());
+        navigate("/dangnhap");
       }
     } catch (error) {
       console.log(error.message);

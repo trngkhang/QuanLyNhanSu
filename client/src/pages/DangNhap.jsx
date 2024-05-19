@@ -51,7 +51,7 @@ export default function DangNhap() {
 
   return (
     <div className="min-h-screen my-20">
-      <div className="flex p-3 max-w-3xl mx-auto flex-col md:flex-row md:items-center gap-5">
+      <div className="flex p-3 max-w-5xl mx-auto flex-col md:flex-row md:items-center gap-5">
         {/* left */}
         <div className="flex-1">
           <Link to="/" className="font-bold dark:text-white text-4xl">
@@ -60,7 +60,17 @@ export default function DangNhap() {
             </span>
             Quản lý nhân sự
           </Link>
-          <p className="text-sm mt-5">Quản lý nhân sự cho doanh nghiệp.</p>
+          <p className="text-xl mt-5 text-bold">
+            Quản lý nhân sự cho doanh nghiệp.
+          </p>
+          <ul className="text-sm">
+            <li>Nhân viên: 100000 password100000</li>
+            <li>Trưởng phòng: 100001 password100001</li>
+            <li>Nhân viên phòng nhân sự: 100003 password100003</li>
+            <li>Trưởng phòng nhân sự: 100005 password100005</li>
+            <li>Nhân viên phòng tài vụ: 100006 password100006</li>
+            <li>Giám đốc: 100008 password100008</li>
+          </ul>
         </div>
         {/* right */}
 
